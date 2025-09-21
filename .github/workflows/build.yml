@@ -1,0 +1,36 @@
+name: Build & Release WPF (NCalc)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore ./RaicesWpf/RaicesWpf.csproj
+      - name: Publish self-contained single file
+        run: >
+          dotnet publish ./RaicesWpf/RaicesWpf.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:PublishTrimmed=false
+      - name: Upload artifact (EXE)
+        uses: actions/upload-artifact@v4
+        with:
+          name: RaicesWpf-EXE
+          path: |
+            RaicesWpf/bin/Release/*/win-x64/publish/*.exe
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            RaicesWpf/bin/Release/*/win-x64/publish/*.exe

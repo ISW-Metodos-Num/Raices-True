@@ -1,0 +1,154 @@
+<Window x:Class="RaicesWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Raices: Biseccion, Regla Falsa, Secante, Newton " Height="720" Width="1080" WindowStartupLocation="CenterScreen">
+    <Grid Margin="14">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ENTRADA -->
+        <Border Grid.Column="0" Padding="12" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1">
+            <StackPanel>
+                <TextBlock Text="Parametros" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+
+                <!-- Método -->
+                <GroupBox Header="Metodo" Margin="0,0,0,10">
+                    <StackPanel Margin="8">
+                        <RadioButton x:Name="rbBiseccion" Content="Bisección (requiere xi, xf)" IsChecked="True" Margin="0,0,0,6" Checked="Metodo_Checked"/>
+                        <RadioButton x:Name="rbReglaFalsa" Content="Regla Falsa (requiere xi, xf)" Margin="0,0,0,6" Checked="Metodo_Checked"/>
+                        <RadioButton x:Name="rbSecante" Content="Secante (xi=x0, xf=x1)" Margin="0,0,0,6" Checked="Metodo_Checked"/>
+                        <RadioButton x:Name="rbNewton" Content="Newton-Raphson (xi=x0)" Checked="Metodo_Checked"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Función -->
+                <GroupBox Header="Función" Margin="0,0,0,10">
+                    <StackPanel Margin="8">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="Ejemplos:" VerticalAlignment="Center"/>
+                            <ComboBox x:Name="cbEjemplos" Width="240" Margin="6,0,0,0" SelectionChanged="CbEjemplos_SelectionChanged">
+                                <ComboBoxItem Content="f(x)=4*x**3-6*x**2+7*x-2.3"/>
+                                <ComboBoxItem Content="g(x)=x**2*Sqrt(Abs(Cos(x)))-5"/>
+                                <ComboBoxItem Content="— Personalizada —"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <TextBlock Text="f(x):"/>
+                        <TextBox x:Name="txtFuncion" Text="4*x**3-6*x**2+7*x-2.3" />
+                        <TextBlock Margin="0,6,0,0" Text="f'(x) (opcional, solo Newton):" />
+                        <TextBox x:Name="txtDerivada" Text="" />
+                        <TextBlock x:Name="txtSugerencias" Margin="0,6,0,0" TextWrapping="Wrap"
+                                   Text="Sugerencias:  Bisección(f): [0,1].  Regla Falsa(g): [-3,-2] o [2,3].  Secante: usa xi=x0, xf=x1.  Newton: xi=x0."/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Valores -->
+                <UniformGrid Columns="2" Rows="3" Margin="0,0,0,10">
+                    <TextBlock Text="xi:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtXi" Text="0" Margin="0,4,0,4"/>
+                    <TextBlock Text="xf:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtXf" Text="1" Margin="0,4,0,4"/>
+                    <TextBlock Text="ea máx:" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtEamax" Text="0.001" Margin="0,4,0,4"/>
+                </UniformGrid>
+
+                <CheckBox x:Name="chkEaPorc" Content="Interpretar ea como %" Margin="0,0,0,10"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Comparar" Width="110" Click="Comparar_Click" Margin="0,0,8,0"/>
+                    <Button Content="Calcular" Width="110" Click="Calcular_Click" Margin="0,0,8,0"/>
+                    <Button Content="Limpiar" Width="90" Click="Limpiar_Click"/>
+                </StackPanel>
+
+                <Separator Margin="0,12,0,12"/>
+                <TextBlock Text="Nota: 6 decimales. Potencia usa ** o Pow(a,b)." Foreground="#555"/>
+            </StackPanel>
+        </Border>
+
+        <!-- SEPARADOR -->
+        <Rectangle Grid.Column="1" Fill="Transparent"/>
+
+        <!-- RESULTADOS / TABLA -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Padding="12" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Resultados" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock x:Name="txtResumenMetodo" Margin="0,4,0,0" Foreground="#666"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Raíz" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="lblRaiz" FontSize="20"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="f(raíz)" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="lblFRAIZ" FontSize="20"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3">
+                        <TextBlock Text="Iteraciones" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="lblIter" FontSize="20"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <Border Padding="12" CornerRadius="10" BorderBrush="#DDD" BorderThickness="1" Grid.Row="2" Margin="0,10,0,0">
+    <StackPanel>
+        <TextBlock Text="Comparativa de métodos" FontWeight="Bold" FontSize="14"/>
+        <TextBlock x:Name="txtMejor" Margin="0,4,0,8" Foreground="#666"/>
+        <DataGrid x:Name="dgComparativa" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0">
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="{x:Null}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBest}" Value="True">
+                                        <Setter Property="Background" Value="#E6F4EA"/>
+                                        <!-- verde we -->
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+
+                        <DataGrid.Columns>
+                <DataGridTextColumn Header="Método" Binding="{Binding Metodo}" Width="*"/>
+                <DataGridTextColumn Header="Iteraciones" Binding="{Binding Iteraciones}" Width="*"/>
+                <DataGridTextColumn Header="Raíz" Binding="{Binding Raiz, StringFormat=F6}" Width="*"/>
+                <DataGridTextColumn Header="f(raíz)" Binding="{Binding YRaiz, StringFormat=F6}" Width="*"/>
+                <DataGridTextColumn Header="ea (%)" Binding="{Binding ErrorAprox, StringFormat=F6}" Width="*"/>
+                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</Border>
+
+            <DataGrid x:Name="dgIteraciones" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" BorderBrush="#DDD" BorderThickness="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="n" Binding="{Binding N}" Width="50"/>
+                    <DataGridTextColumn Header="xi/x0" Binding="{Binding Xi, StringFormat=F6}" Width="*"/>
+                    <DataGridTextColumn Header="f(xi)" Binding="{Binding FXi, StringFormat=F6}" Width="*"/>
+                    <DataGridTextColumn Header="xu/x1" Binding="{Binding Xf, StringFormat=F6}" Width="*"/>
+                    <DataGridTextColumn Header="f(xu)" Binding="{Binding FXu, StringFormat=F6}" Width="*"/>
+                    <DataGridTextColumn Header="xr (nuevo)" Binding="{Binding Xr, StringFormat=F6}" Width="*"/>
+                    <DataGridTextColumn Header="f(xr)" Binding="{Binding FXr, StringFormat=F6}" Width="*"/>
+                    <DataGridTextColumn Header="ea (%)" Binding="{Binding EaPercent, StringFormat=F6}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>
